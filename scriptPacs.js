@@ -4,23 +4,13 @@
 const urlEnString = window.location.href;
 const urlDireccion = new URL(urlEnString);
 const patientId = urlDireccion.searchParams.get("patient_id");
-const listaEstudios = patientId ? document.getElementById('mainTab-0-SV_studyList') : obtenerDatos('-SV_studyList');
-const pinIzq = patientId ? document.getElementById('mainTab-0-SV-patientLayout_west_pin') : obtenerDatos('-SV-patientLayout_west_pin');
-const pinDer = patientId ? document.getElementById('mainTab-0-SV-patientLayout_east_pin') : obtenerDatos('-SV-patientLayout_east_pin');
-const MODALIDADES = {
-    'OT' : 'densitometria',
-    'US' : 'ecografia',
-    'DX' : 'radiologia',
-    'CR' : 'radiologia',
-    'MG' : 'mamografia',
-    'MR' : 'resonancia',
-    'CT' : 'tomografia',
-    'XA' : 'hemodinamia'
-}
+const listaEstudios = obtenerDatos('-SV_studyList');
+const pinIzq = obtenerDatos('-SV-patientLayout_west_pin');
+const pinDer = obtenerDatos('-SV-patientLayout_east_pin');
 clickEnPin(pinIzq);
 clickEnPin(pinDer);
-const nombre = patientId ? document.getElementById('mainTab-0-tabCaptionPlace') : obtenerDatos('-tabCaptionPlace');
-const documento = patientId ? document.getElementById('mainTab-0-SV_patDetails0') : obtenerDatos('-SV_patDetails0');
+const nombre = obtenerDatos('-tabCaptionPlace');
+const documento = obtenerDatos('-SV_patDetails0');
 
 const delay = (time) => new Promise(resolve => setTimeout(resolve, time));
 
@@ -31,18 +21,24 @@ function clickEnPin(pin) {
 }
 
 function obtenerDatos(parteDelIdABuscar) {
-    const primeraParte = 'mainTab-';
-    for(let contador = 1; contador < 100; contador++) {
-        const id = `${primeraParte}${contador}${parteDelIdABuscar}`;
-        if (document.getElementById(id)) {
-            return document.getElementById(id);
-        }
-    }
+    const num = patientId ? '0' : document.getElementById('mainTabContentContainer').children[1].id.split('-')[1];
+    const id = `mainTab-${num}${parteDelIdABuscar}`;
+    return document.getElementById(id);
 }
 
 function obtenerNombresDeLosPDF(lista) {
     const contador = {}
     const resultado = []
+    const MODALIDADES = {
+        'OT' : 'densitometria',
+        'US' : 'ecografia',
+        'DX' : 'radiologia',
+        'CR' : 'radiologia',
+        'MG' : 'mamografia',
+        'MR' : 'resonancia',
+        'CT' : 'tomografia',
+        'XA' : 'hemodinamia'
+    }
 
     lista.forEach(estudio => {
         const fecha = estudio.getElementsByClassName("sccDate")[0].textContent.split(' ')[0].replaceAll('/','-');
@@ -69,7 +65,7 @@ async function recorrerLista(lista) {
         if(i > 0) {
             lista[i].children[0].click()
         }
-        const botonImpresora = patientId ? document.getElementById('mainTab-0-SV_printBtn') : obtenerDatos('-SV_printBtn');
+        const botonImpresora = obtenerDatos('-SV_printBtn');
         await delay(4000);
         if(botonImpresora.classList.length != 3) {
             if (i > 0) {
