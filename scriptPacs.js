@@ -5,18 +5,15 @@ const urlEnString = window.location.href;
 const urlDireccion = new URL(urlEnString);
 const patientId = urlDireccion.searchParams.get("patient_id");
 const listaEstudios = obtenerDatos('-SV_studyList');
-const pinIzq = obtenerDatos('-SV-patientLayout_west_pin');
-const pinDer = obtenerDatos('-SV-patientLayout_east_pin');
-clickEnPin(pinIzq);
-clickEnPin(pinDer);
-const nombre = obtenerDatos('-tabCaptionPlace');
-const documento = obtenerDatos('-SV_patDetails0');
+clickEnPin(obtenerDatos('-SV-patientLayout_west_pin'));
+clickEnPin(obtenerDatos('-SV-patientLayout_east_pin'));
+
 
 const delay = (time) => new Promise(resolve => setTimeout(resolve, time));
 
 function clickEnPin(pin) {
     if(pin.getAttributeNode('pin').value == 'up') {
-        pin.click()
+        pin.click();
     }
 }
 
@@ -27,8 +24,10 @@ function obtenerDatos(parteDelIdABuscar) {
 }
 
 function obtenerNombresDeLosPDF(lista) {
-    const contador = {}
-    const resultado = []
+    const contador = {};
+    const resultado = [];
+    const nombre = obtenerDatos('-tabCaptionPlace');
+    const documento = obtenerDatos('-SV_patDetails0');
     const MODALIDADES = {
         'OT' : 'densitometria',
         'US' : 'ecografia',
@@ -38,7 +37,7 @@ function obtenerNombresDeLosPDF(lista) {
         'MR' : 'resonancia',
         'CT' : 'tomografia',
         'XA' : 'hemodinamia'
-    }
+    };
 
     lista.forEach(estudio => {
         const fecha = estudio.getElementsByClassName("sccDate")[0].textContent.split(' ')[0].replaceAll('/','-');
@@ -63,23 +62,23 @@ async function recorrerLista(lista) {
     for (let i = 0; i < lista.length && continuar; i++) {
         let mensaje = "";
         if(i > 0) {
-            lista[i].children[0].click()
+            lista[i].children[0].click();
         }
         const botonImpresora = obtenerDatos('-SV_printBtn');
         await delay(4000);
         if(botonImpresora.classList.length != 3) {
             if (i > 0) {
                 try {
-                    await navigator.clipboard.writeText(nombreArchivo[i])
-                    console.log('Texto copiado al portapapeles:', nombreArchivo[i])
+                    await navigator.clipboard.writeText(nombreArchivo[i]);
+                    console.log('Texto copiado al portapapeles:', nombreArchivo[i]);
                 } catch (err) {
-                    console.error('Error al copiar al portapapeles:',nombreArchivo[i], err)
+                    console.error('Error al copiar al portapapeles:',nombreArchivo[i], err);
                 } 
             }
             botonImpresora.click()
             await delay(2000);
         } else {
-            mensaje = "el informe no esta disponible "
+            mensaje = "el informe no esta disponible ";
         }
         continuar = confirm(mensaje +"¿Pasar al siguiente?");
     }
