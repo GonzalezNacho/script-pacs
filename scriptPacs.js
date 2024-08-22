@@ -65,7 +65,7 @@ async function recorrerLista(lista) {
             lista[i].children[0].click();
         }
         const botonImpresora = obtenerDatos('-SV_printBtn');
-        await delay(4000);
+        await delay(5000);
         if(botonImpresora.classList.length != 3) {
             if (i > 0) {
                 try {
