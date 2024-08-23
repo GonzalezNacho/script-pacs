@@ -7,6 +7,8 @@ const patientId = urlDireccion.searchParams.get("patient_id");
 const listaEstudios = obtenerDatos('-SV_studyList');
 clickEnPin(obtenerDatos('-SV-patientLayout_west_pin'));
 clickEnPin(obtenerDatos('-SV-patientLayout_east_pin'));
+agregarBotonSalir();
+let continuar = true;
 
 
 const delay = (time) => new Promise(resolve => setTimeout(resolve, time));
@@ -15,6 +17,22 @@ function clickEnPin(pin) {
     if(pin.getAttributeNode('pin').value == 'up') {
         pin.click();
     }
+}
+
+function agregarBotonSalir() {
+    const tdAnterior = obtenerDatos('-SV_tdFullScreenBtn');
+    const listaBotones = tdAnterior.parentNode;
+    const boton = document.createElement('td');
+    boton.classList.add('btnLink1')
+    const a = document.createElement('a');
+    const texto = document.createTextNode('salir');
+    a.appendChild(texto);
+    boton.appendChild(a);
+    console.log(listaBotones)
+    listaBotones.insertBefore(boton,tdAnterior)
+    boton.addEventListener('click', () => {
+        continuar = false;
+    });
 }
 
 function obtenerDatos(parteDelIdABuscar) {
@@ -42,13 +60,13 @@ function obtenerNombresDeLosPDF(lista) {
     lista.forEach(estudio => {
         const fecha = estudio.getElementsByClassName("sccDate")[0].textContent.split(' ')[0].replaceAll('/','-');
         const modalidad = MODALIDADES[estudio.getElementsByClassName('sccStudyNameInner')[0].textContent.split(' ')[0]];
-        const nombreA = modalidad + nombre.innerHTML + documento.innerHTML + fecha;
+        const nombreA = modalidad +'-'+ nombre.innerHTML + documento.innerHTML +'-'+ fecha;
         if (contador[nombreA]) {
             contador[nombreA]++;
-            resultado.push(`${nombreA}${contador[nombreA]}`);
+            resultado.push({pdf: `${nombreA}-${contador[nombreA]}`, fecha: fecha});
         } else {
             contador[nombreA] = 1;
-            resultado.push(nombreA);
+            resultado.push({pdf: nombreA, fecha: fecha});
         }
     });
 
@@ -56,31 +74,33 @@ function obtenerNombresDeLosPDF(lista) {
 }
 
 async function recorrerLista(lista) {
-    const nombreArchivo = obtenerNombresDeLosPDF(lista)
-    copy(nombreArchivo[0])
-    let continuar = true;
+    const nombreArchivo = obtenerNombresDeLosPDF(lista);
+    copy(nombreArchivo[0].pdf)
     for (let i = 0; i < lista.length && continuar; i++) {
-        let mensaje = "";
-        if(i > 0) {
-            lista[i].children[0].click();
-        }
-        const botonImpresora = obtenerDatos('-SV_printBtn');
-        await delay(4000);
-        if(botonImpresora.classList.length != 3) {
-            if (i > 0) {
-                try {
-                    await navigator.clipboard.writeText(nombreArchivo[i]);
-                    console.log('Texto copiado al portapapeles:', nombreArchivo[i]);
-                } catch (err) {
-                    console.error('Error al copiar al portapapeles:',nombreArchivo[i], err);
-                } 
+        const imprimirEstudio = confirm(`¿Desea imprimir el informe del día  ${nombreArchivo[i].fecha} ?`);
+        if(imprimirEstudio) {
+            let mensaje = "";
+            if(i > 0) {
+                lista[i].children[0].click();
             }
-            botonImpresora.click()
-            await delay(3000);
-        } else {
-            mensaje = "el informe no esta disponible ";
+            const botonImpresora = obtenerDatos('-SV_printBtn');
+            await delay(4000);
+            if(botonImpresora.classList.length != 3) {
+                if (i > 0) {
+                    try {
+                        await navigator.clipboard.writeText(nombreArchivo[i].pdf);
+                        console.log('Texto copiado al portapapeles:', nombreArchivo[i].pdf);
+                    } catch (err) {
+                        console.error('Error al copiar al portapapeles:',nombreArchivo[i].pdf, err);
+                    } 
+                }
+                botonImpresora.click()
+                await delay(4000);
+            } else {
+                mensaje = "el informe no esta disponible ";
+            }
+            continuar = confirm(mensaje +"¿Pasar al siguiente?");
         }
-        continuar = confirm(mensaje +"¿Pasar al siguiente?");
     }
 }
 
