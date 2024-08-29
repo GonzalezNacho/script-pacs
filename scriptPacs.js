@@ -27,7 +27,6 @@ function obtenerNombresDeLosPDF(lista) {
     const nombre = obtenerDatos('-tabCaptionPlace');
     const documento = obtenerDatos('-SV_patDetails0');
     const MODALIDADES = {
-        'OT' : 'densitometria',
         'US' : 'ecografia',
         'DX' : 'radiologia',
         'CR' : 'radiologia',
@@ -39,7 +38,8 @@ function obtenerNombresDeLosPDF(lista) {
 
     lista.forEach(estudio => {
         const fecha = estudio.getElementsByClassName("sccDate")[0].textContent.split(' ')[0].replaceAll('/','-');
-        const modalidad = MODALIDADES[estudio.getElementsByClassName('sccStudyNameInner')[0].textContent.split(' ')[0]];
+        const siglaModalidad = estudio.getElementsByClassName('sccStudyNameInner')[0].textContent.split(' ');
+        const modalidad = MODALIDADES[siglaModalidad[0] == 'OT' ? siglaModalidad[1] : siglaModalidad[0]];
         const nombreA = modalidad +'-'+ nombre.innerHTML + documento.innerHTML +'-'+ fecha;
         if (contador[nombreA]) {
             contador[nombreA]++;
